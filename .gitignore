@@ -1,0 +1,72 @@
+# Project files and directories
+media/
+media/*
+/media/
+/eurate/tmp/
+/eurate/media/
+
+# idea
+.idea/
+*/.idea
+*\.idea
+
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.py[co]
+*.pyc
+*$py.class
+
+# C extensions
+*.so
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+
+# Translations
+*.pot
+
+# Django stuff:
+*.log
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# db sqlite file
+*.sqlite3
+
+# secret key file
+.secret.key
+
+
+__init__.pyc
+celery.pyc
+logs/
+eurate.ini
+eurate.sock
+
+static/node_modules/
+static/package-lock.json
+static/dist/
+email_messages/
