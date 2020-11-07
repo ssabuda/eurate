@@ -6,7 +6,7 @@ from core.models import TimeStampedModel
 class RateManager(models.Manager):
     def newest(self, **kwargs):
         newest_date = self.latest("date").date
-        return self.filter(data=newest_date)
+        return self.filter(date=newest_date)
 
 
 class Rate(TimeStampedModel):
@@ -22,6 +22,10 @@ class Rate(TimeStampedModel):
         ordering = ("-date", "currency")
         index_together = ("currency", "date")
         unique_together = ("currency", "date")
+
+    def save(self, *args, **kwargs):
+        self.currency = self.currency.upper()
+        super().save(*args, **kwargs)
 
     def __str__(self) -> str:
         return f"{self.date} - {self.currency} - {self.rate}"
