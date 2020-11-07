@@ -8,6 +8,9 @@ class RateManager(models.Manager):
         newest_date = self.latest("date").date
         return self.filter(date=newest_date)
 
+    def currency(self, currency: str, ** kwargs):
+        return self.filter(currency__iexact=currency)
+
 
 class Rate(TimeStampedModel):
     currency = models.CharField(max_length=3, null=False, blank=False, db_index=True)

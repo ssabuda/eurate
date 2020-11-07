@@ -12,7 +12,7 @@ class RateFactory(DjangoModelFactory):
         django_get_or_create = ("currency", "date")
 
     currency = FuzzyText(length=3)
-    date = FuzzyDate(datetime.date(2020, 1, 1))
+    date = FuzzyDate(datetime.date(2018, 1, 1))
     rate = FuzzyDecimal(0.0001, 99999.9999, precision=4)
 
 
