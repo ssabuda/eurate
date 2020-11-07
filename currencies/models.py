@@ -12,8 +12,11 @@ class RateManager(models.Manager):
     def currency(self, currency: str, **kwargs):
         return self.filter(currency__iexact=currency)
 
-    def date(self, date: date, **kwargs):
-        return self.filter(date=date)
+    def date(self, date_value: date, **kwargs):
+        return self.filter(date=date_value)
+
+    def is_exists(self, date_value: date, currency: str) -> bool:
+        return self.filter(date=date_value, currency__iexact=currency).exists()
 
 
 class Rate(TimeStampedModel):

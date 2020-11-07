@@ -34,6 +34,7 @@ class TestRateManager(TestCase):
     NEWEST_COUNT = 3
     NEWEST_DATE = date(2020, 6, 4)
     USD_DATE = date(2020, 5, 26)
+    USD_CURRENCY = "USD"
     FILTER_DATE = date(2020, 6, 2)
 
     @classmethod
@@ -75,7 +76,7 @@ class TestRateManager(TestCase):
 
     def test_currency_upper(self):
         # when
-        rates = Rate.objects.currency("USD").values_list("pk", flat=True)
+        rates = Rate.objects.currency(self.USD_CURRENCY).values_list("pk", flat=True)
         self.assertListEqual(list(rates), [self.usd.pk])
 
     def test_currency_mix(self):
@@ -90,3 +91,11 @@ class TestRateManager(TestCase):
     def test_date(self):
         rates = Rate.objects.date(self.FILTER_DATE).values_list("date", flat=True)
         self.assertSetEqual(set(rates), {self.FILTER_DATE})
+
+    def test_is_exist_true(self):
+        rates = Rate.objects.is_exists(self.USD_DATE, self.USD_CURRENCY)
+        self.assertTrue(rates)
+
+    def test_is_exists_false(self):
+        rates = Rate.objects.is_exists(date(1986, 1, 1), "XYZ")
+        self.assertFalse(rates)
