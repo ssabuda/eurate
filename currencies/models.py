@@ -1,3 +1,4 @@
+from datetime import date
 from django.db import models
 
 from core.models import TimeStampedModel
@@ -8,8 +9,11 @@ class RateManager(models.Manager):
         newest_date = self.latest("date").date
         return self.filter(date=newest_date)
 
-    def currency(self, currency: str, ** kwargs):
+    def currency(self, currency: str, **kwargs):
         return self.filter(currency__iexact=currency)
+
+    def date(self, date: date, **kwargs):
+        return self.filter(date=date)
 
 
 class Rate(TimeStampedModel):
