@@ -32,7 +32,7 @@ class TestRateModel(TestCase):
 
 class TestRateManager(TestCase):
     NEWEST_COUNT = 3
-    NEWEST_DATE = date(2020, 6, 4)
+    NEWEST_DATE = date(2099, 12, 31)
     USD_DATE = date(2020, 5, 26)
     USD_CURRENCY = "USD"
     FILTER_DATE = date(2020, 6, 2)
