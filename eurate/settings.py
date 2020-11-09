@@ -133,3 +133,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+ECB_HISTORIC_RATES_URL = (
+    "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist.xml"
+)
+ECB_LAST_90_DAYS_RATES_URL = (
+    "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist-90d.xml"
+)
