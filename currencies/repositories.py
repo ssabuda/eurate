@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, Iterable
+from typing import Optional, Iterator
 from xml.etree import ElementTree
 
 import requests
@@ -22,7 +22,7 @@ class APIEcbRepository(APIRepository):
         )
         return requests.get(url).content
 
-    def get_rates(self, api_data: bytes) -> Iterable[RateEcbAdapter]:
+    def get_rates(self, api_data: bytes) -> Iterator[RateEcbAdapter]:
         xml_data = ElementTree.fromstring(api_data)
         data = xml_data.findall(
             "./eurofxref:Cube/eurofxref:Cube[@time]", ECB_XML_NAMESPACE
@@ -32,6 +32,6 @@ class APIEcbRepository(APIRepository):
             for element in list(d):
                 yield RateEcbAdapter(date_value, element)
 
-    def all(self) -> Iterable[RateEcbAdapter]:
+    def all(self) -> Iterator[RateEcbAdapter]:
         api_data = self.call_api()
         return self.get_rates(api_data)

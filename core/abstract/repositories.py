@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Iterable
+from typing import Any, Iterator
 
 from core.abstract.adapters import RateAdapter
 
@@ -10,9 +10,9 @@ class APIRepository(ABC):
         pass
 
     @abstractmethod
-    def get_rates(self, data_api: Any) -> Iterable[RateAdapter]:
+    def get_rates(self, data_api: Any) -> Iterator[RateAdapter]:
         pass
 
     @abstractmethod
-    def all(self) -> Iterable[RateAdapter]:
+    def all(self) -> Iterator[RateAdapter]:
         pass
