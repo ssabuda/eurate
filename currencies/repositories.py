@@ -27,9 +27,9 @@ class APIEcbRepository(APIRepository):
         data = xml_data.findall(
             "./eurofxref:Cube/eurofxref:Cube[@time]", ECB_XML_NAMESPACE
         )
-        for d in data:
-            date_value = datetime.strptime(d.get("time"), "%Y-%m-%d").date()
-            for element in list(d):
+        for elements in data:
+            date_value = datetime.strptime(elements.get("time"), "%Y-%m-%d").date()
+            for element in elements:
                 yield RateEcbAdapter(date_value, element)
 
     def all(self) -> Iterator[RateEcbAdapter]:

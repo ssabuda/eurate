@@ -31,6 +31,6 @@ class TestAPIEcbRepository(TestCase):
 
         count = 0
         rates = APIEcbRepository().all()
-        for rate in rates:
+        for _ in rates:
             count += 1
         self.assertEqual(count, 2048)
