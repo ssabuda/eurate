@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from datetime import date
+import datetime
 from decimal import Decimal
 
 
@@ -11,7 +11,7 @@ class RateAdapter(ABC):
 
     @property
     @abstractmethod
-    def date_value(self) -> date:
+    def date(self) -> datetime.date:
         pass
 
     @property

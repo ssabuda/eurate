@@ -6,13 +6,13 @@ from core.abstract.adapters import RateAdapter
 
 
 class RateEcbAdapter(RateAdapter):
-    def __init__(self, date: datetime.date, data: Element):
-        self.date = date
+    def __init__(self, date_init: datetime.date, data: Element):
+        self.date_init = date_init
         self.data = data
 
     @property
-    def date_value(self) -> datetime.date:
-        return self.date
+    def date(self) -> datetime.date:
+        return self.date_init
 
     @property
     def currency(self) -> str:
@@ -23,4 +23,4 @@ class RateEcbAdapter(RateAdapter):
         return Decimal(self.data.get("rate"))
 
     def to_dict(self) -> dict:
-        return {"currency": self.currency, "date": self.date_value, "rate": self.rate}
+        return {"currency": self.currency, "date": self.date, "rate": self.rate}
