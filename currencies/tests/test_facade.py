@@ -1,5 +1,3 @@
-from django.test import TestCase
-
 from currencies.exceptions import RateAlreadyExists
 from currencies.facade import RateFacade
 from currencies.factories import RateFactoryUSD
