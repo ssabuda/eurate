@@ -8,13 +8,15 @@ from currencies.fixtures import ECB_RESPONSE
 from currencies.repositories import APIEcbRepository
 
 
-class TestRateEcbAdapter(TestCase):
+class TestEcbAdapterMixin(TestCase):
     @mock.patch.object(APIEcbRepository, "call_api")
     def setUp(self, mock_api):
         mock_api.return_value = ECB_RESPONSE
         repo = APIEcbRepository().all()
         self.adapter = next(repo)
 
+
+class TestRateEcbAdapter(TestEcbAdapterMixin):
     def test_currency(self):
         self.assertEqual(self.adapter.currency, "USD")
 
