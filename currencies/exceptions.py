@@ -1,0 +1,2 @@
+class RateAlreadyExists(Exception):
+    pass
