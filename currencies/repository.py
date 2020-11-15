@@ -5,8 +5,8 @@ from xml.etree import ElementTree
 import requests
 from django.conf import settings
 
-from core.abstract.repositories import APIRepository
-from .adapters import RateEcbAdapter
+from core.abstract.repository import APIRepository
+from .adapter import RateEcbAdapter
 from .constants import ECB_XML_NAMESPACE
 
 

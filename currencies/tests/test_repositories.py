@@ -4,9 +4,9 @@ import requests
 from django.conf import settings
 from django.test import TestCase
 
-from ..adapters import RateEcbAdapter
+from ..adapter import RateEcbAdapter
 from ..fixtures import ECB_RESPONSE
-from ..repositories import APIEcbRepository
+from ..repository import APIEcbRepository
 
 
 class TestAPIEcbRepository(TestCase):

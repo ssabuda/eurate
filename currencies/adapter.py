@@ -2,7 +2,7 @@ import datetime
 from decimal import Decimal
 from xml.etree.ElementTree import Element
 
-from core.abstract.adapters import RateAdapter
+from core.abstract.adapter import RateAdapter
 
 
 class RateEcbAdapter(RateAdapter):

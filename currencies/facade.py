@@ -1,4 +1,4 @@
-from core.abstract.adapters import RateAdapter
+from core.abstract.adapter import RateAdapter
 from .exceptions import RateAlreadyExists
 from .models import Rate
 

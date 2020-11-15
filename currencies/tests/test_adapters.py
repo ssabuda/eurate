@@ -5,7 +5,7 @@ from unittest import mock
 from django.test import TestCase
 
 from currencies.fixtures import ECB_RESPONSE
-from currencies.repositories import APIEcbRepository
+from currencies.repository import APIEcbRepository
 
 
 class TestEcbAdapterMixin(TestCase):
