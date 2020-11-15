@@ -2,7 +2,7 @@ from currencies.exceptions import RateAlreadyExists
 from currencies.facade import RateFacade
 from currencies.factories import RateFactoryUSD
 from currencies.models import Rate
-from currencies.tests.test_adapters import TestEcbAdapterMixin
+from currencies.tests.test_adapter import TestEcbAdapterMixin
 
 
 class TestRateFacade(TestEcbAdapterMixin):
