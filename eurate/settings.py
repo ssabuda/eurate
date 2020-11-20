@@ -9,7 +9,26 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
+import hashlib
+import os
+import uuid
 from pathlib import Path
+
+
+def get_secret_key(base_dir="."):
+    def gen_key(key_path):
+        with open(key_path, "w") as key_file:
+            key = hashlib.sha512(str(uuid.uuid4()).encode("utf8")).hexdigest()
+            key_file.write(key)
+        return key
+
+    path = os.path.join(base_dir, ".secret.key")
+    try:
+        secret_key = open(path).read()
+        assert secret_key, "Wrong secret key"
+    except (IOError, AssertionError):
+        secret_key = gen_key(path)
+    return secret_key
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -19,7 +38,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'k@72yn&glwdvskc3b986inh2o6jy7@y3#_*m&84k$gl)ks@jqv'
+SECRET_KEY = get_secret_key(BASE_DIR)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
