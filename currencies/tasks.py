@@ -18,7 +18,7 @@ def run_import(historic: Optional[bool] = False):
 
 def create_rate(adapter: RateEcbAdapter):
     if Rate.objects.is_exists(adapter.date, adapter.currency):
-        logger.info(
+        logger.debug(
             "Skipped exists Rate currency=%s date=%s", adapter.currency, adapter.date
         )
         return
