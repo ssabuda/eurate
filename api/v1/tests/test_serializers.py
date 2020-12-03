@@ -8,7 +8,7 @@ class TestRateSerializer(TestCase):
     def test_data(self):
         rate = RateFactory()
         serializer = RateSerializer(rate)
-        self.assertEqual(
+        self.assertDictEqual(
             serializer.data,
             {"currency": rate.currency, "date": str(rate.date), "rate": str(rate.rate)},
         )
