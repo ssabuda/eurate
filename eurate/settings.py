@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     # my app
     "core",
     "currencies",
+    "api",
 ]
 
 MIDDLEWARE = [
