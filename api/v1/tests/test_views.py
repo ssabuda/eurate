@@ -1,8 +1,9 @@
-from django.urls import reverse
+from django.urls import reverse, resolve
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from currencies.factories import RateFactory, RateFactoryUSD, RateFactoryPLN
+from api.v1.views import RateList
+from currencies.factories import RateFactoryUSD, RateFactoryPLN
 
 
 class TestRateList(APITestCase):
@@ -27,3 +28,7 @@ class TestRateList(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.data["count"], 2)
         self.assertSetEqual({c["currency"] for c in response.data["results"]}, {"PLN"})
+
+    def test_url_resolves_to_view(self):
+        resolver_match = resolve(self.url)
+        self.assertEqual(resolver_match.func.cls, RateList)
