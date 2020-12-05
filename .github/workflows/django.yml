@@ -27,7 +27,6 @@ jobs:
           - 5432:5432
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
-
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
@@ -38,6 +37,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+      - name: Make migrations
+        run: |
+          python manage.py makemigrations
       - name: Run Migrations
         run: |
           python manage.py migrate
