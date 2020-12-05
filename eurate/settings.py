@@ -121,8 +121,8 @@ if os.environ.get("GITHUB_WORKFLOW"):
         "default": {
             "ENGINE": "django.db.backends.postgresql",
             "NAME": "postgres",
-            "USER": "ctest",
-            "PASSWORD": "coveragetest123",
+            "USER": "postgres",
+            "PASSWORD": "postgres",
             "HOST": "localhost",
             "PORT": 5432,
         }
