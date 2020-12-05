@@ -10,7 +10,7 @@ class RateList(ListAPIView):
     filterset_fields = ["currency", "date"]
 
 
-class RateLatestList(ListAPIView):
+class RateNewestList(ListAPIView):
     queryset = Rate.objects.newest()
     serializer_class = RateSerializer
     filterset_fields = [
