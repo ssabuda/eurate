@@ -20,7 +20,7 @@ jobs:
       db:
         image: postgres
         env:
-          POSTGRES_DB: postgres
+          POSTGRES_DB: eurate
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
         ports:
