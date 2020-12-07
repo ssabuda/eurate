@@ -6,7 +6,10 @@ from core.models import TimeStampedModel
 
 class RateManager(models.Manager):
     def newest(self, **kwargs):
-        newest_date = self.latest("date").date
+        try:
+            newest_date = self.latest("date").date
+        except Rate.DoesNotExist:
+            return self.filter()
         return self.filter(date=newest_date)
 
     def currency(self, currency: str, **kwargs):

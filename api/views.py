@@ -11,8 +11,11 @@ class RateList(ListAPIView):
 
 
 class RateNewestList(ListAPIView):
-    queryset = Rate.objects.newest()
+    model = Rate
     serializer_class = RateSerializer
     filterset_fields = [
         "currency",
     ]
+
+    def get_queryset(self):
+        return self.model.objects.newest()
