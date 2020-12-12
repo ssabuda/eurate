@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+{% load i18n %}
+{% load static %}
+
+
+{# Load the tag library #}
+{% load bootstrap4 %}
+<head>
+    {# Load CSS and JavaScript #}
+    {% bootstrap_css %}
+    {% bootstrap_javascript jquery='full' %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Euro exchange rate">
+    <meta name="author" content="ssabuda">
+
+    <title>Eurate</title>
+
+
+    <!-- Custom styles for this template -->
+    <link href="{% static "cover.css" %}" rel="stylesheet">
+
+</head>
+
+<body class="text-center">
+
+<div class="cover-container d-flex h-100 p-3 mx-auto flex-column">
+    <header class="masthead mb-auto">
+        <div class="inner">
+            <h3 class="masthead-brand">Eurate</h3>
+            <nav class="nav nav-masthead justify-content-center">
+                <a class="nav-link active" href="{% url 'home' %}">Home</a>
+                <a class="nav-link" href="{% url 'api:root' %}">API</a>
+                <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
+            </nav>
+        </div>
+    </header>
+
+    <main role="main" class="inner cover">
+        <h1 class="cover-heading">Euro exchange rate.</h1>
+        <p class="lead">This application allows you to download the Euro exchange rate.
+            Is downloaded from the <a href="https://www.ecb.europa.eu/">European Central Bank.</a>
+            It allows you to download data from the entire history, or for the last 90 days. The
+            data can be downloaded as a CSV file in the administration panel. The data is also available via API.</p>
+        <p class="lead">
+            <a href="https://github.com/ssabuda/eurate/" class="btn btn-lg btn-secondary">Learn more</a>
+        </p>
+    </main>
+
+
+    <footer class="mastfoot mt-auto">
+        <div class="inner">
+            <p>Created by <a href="https://github.com/ssabuda/">ssabuda</a>
+        </div>
+    </footer>
+</div>
+
+</body>
+</html>
