@@ -65,3 +65,17 @@ class TestRateNewestList(APITestCase):
     def test_url_resolves_to_view(self):
         resolver_match = resolve(self.url)
         self.assertEqual(resolver_match.func.cls, RateNewestList)
+
+
+class TestApiRootVIew(APITestCase):
+    def test_status(self):
+        response = self.client.get(reverse("api:root"))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_data_rates(self):
+        response = self.client.get(reverse("api:root"))
+        self.assertContains(response, "currency rates")
+
+    def test_data_newest(self):
+        response = self.client.get(reverse("api:root"))
+        self.assertContains(response, "newest currency rates")
