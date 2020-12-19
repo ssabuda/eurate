@@ -27,4 +27,16 @@ docker-compose build
 docker-compose up
 ```
 
+- run bash in a running container
+
+```bash
+docker-compose exec web bash
+```
+
+- run migrations
+
+```bash
+./manage migrate
+```
+
 App is running on [http://localhost:8000/](http://localhost:8000/)
