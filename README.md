@@ -81,30 +81,37 @@ ID,created,modified,currency,date,rate
 ```
 
 ## API
+
 Two API endpoints are available:
+
 - [http://localhost:8000/api/v1/rates/](http://localhost:8000/api/v1/rates/)
 - [http://localhost:8000/api/v1/newest/](http://localhost:8000/api/v1/newest/)
 
 example data:
+
 ```json
 {
-    "count": 1,
-    "next": null,
-    "previous": null,
-    "results": [
-        {
-            "currency": "USD",
-            "date": "2020-12-18",
-            "rate": "1.2259"
-        }
-    ]
+  "count": 1,
+  "next": null,
+  "previous": null,
+  "results": [
+    {
+      "currency": "USD",
+      "date": "2020-12-18",
+      "rate": "1.2259"
+    }
+  ]
 }
 ```
+
 ### Pagination
+
 page size is set to `100`
 
 ### Filters
-Two filters for date and currency are available i.e:
+
+Two filters for `date` and `currency` are available i.e:
+
 ```text
 http://localhost:8000/api/v1/rates/?currency=USD&date=2020-12-03
 ```
