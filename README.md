@@ -51,7 +51,7 @@ If you want to use the admin panel, you must first create a super user account. 
 
 next follow the instructions. Now you can access into [admin panel](http://localhost:8000/admin/)
 
-## Import exchange rates
+## Import currency exchange rates
 
 - import data from the last 90 days:
     ```bash
@@ -61,3 +61,21 @@ next follow the instructions. Now you can access into [admin panel](http://local
     ```bash
   ./manage.py run_ecb_import --historic
     ```
+
+## Download currency exchange rates as CSV file
+
+- Go to [http://localhost:8000/admin/currencies/rate/](http://localhost:8000/admin/currencies/rate/)
+- select rows
+- select `Export CSV` from `Action` list
+- click `Go`
+
+example data:
+
+```text
+ID,created,modified,currency,date,rate
+2161,2020-12-19 10:14,2020-12-19 10:14,AUD,2020-12-18,1.6107
+2147,2020-12-19 10:14,2020-12-19 10:14,BGN,2020-12-18,1.9558
+2162,2020-12-19 10:14,2020-12-19 10:14,BRL,2020-12-18,6.2668
+2163,2020-12-19 10:14,2020-12-19 10:14,CAD,2020-12-18,1.5638
+2155,2020-12-19 10:14,2020-12-19 10:14,CHF,2020-12-18,1.0845
+```
