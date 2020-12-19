@@ -115,3 +115,11 @@ Two filters for `date` and `currency` are available i.e:
 ```text
 http://localhost:8000/api/v1/rates/?currency=USD&date=2020-12-03
 ```
+
+## Tests
+Unite test coverage is `94%`
+
+Starting tests command:
+```bash
+./manage.py test
+```
