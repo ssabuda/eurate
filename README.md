@@ -8,3 +8,23 @@ This application allows you to download the Euro exchange rate. Is downloaded fr
 the [European Central Bank]("https://www.ecb.europa.eu/"). It allows you to download data from the entire history, or
 for the last 90 days. The data can be downloaded as a CSV file in the administration panel. The data is also available
 via API.
+
+## Installation
+
+I recommend using docker-compose, it is the fastest way to start the application:
+
+- [install docker](https://docs.docker.com/engine/install/)
+- [install docker-compose](https://docs.docker.com/compose/install/)
+- build docker
+
+```bash
+docker-compose build
+```
+
+- start dockers
+
+```bash
+docker-compose up
+```
+
+App is running on [http://localhost:8000/](http://localhost:8000/)
