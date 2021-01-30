@@ -18,6 +18,13 @@ services:
       - "8000:8000"
     depends_on:
       - db
+  import_data:
+    build: .
+    command: python manage.py run_ecb_import
+    volumes:
+      - .:/code
+    depends_on:
+      - web
 
 volumes:
   db_data:
