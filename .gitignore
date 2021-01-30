@@ -70,3 +70,5 @@ static/node_modules/
 static/package-lock.json
 static/dist/
 email_messages/
+
+docker-compose.override.yml
