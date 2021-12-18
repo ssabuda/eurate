@@ -46,6 +46,8 @@ class TestRateManager(TestCase):
         RateFactory.create_batch(cls.NEWEST_COUNT, date=cls.NEWEST_DATE)
         cls.usd = RateFactoryUSD(date=cls.USD_DATE)
         cls.pln = RateFactoryPLN()
+        cls.most_expensive_pln = RateFactoryPLN(rate=99999.9999)
+        cls.cheapest_pln = RateFactoryPLN(rate=0.0001)
 
     def test_newest_count(self):
         # when
@@ -67,15 +69,13 @@ class TestRateManager(TestCase):
 
     def test_currency(self):
         rates = Rate.objects.currency("PLN").values_list("pk", flat=True)
-        self.assertListEqual(list(rates), [self.pln.pk])
+        self.assertIn(self.pln.pk, rates)
 
     def test_currency_lower(self):
-        # when
         rates = Rate.objects.currency("usd").values_list("pk", flat=True)
         self.assertListEqual(list(rates), [self.usd.pk])
 
     def test_currency_upper(self):
-        # when
         rates = Rate.objects.currency(self.USD_CURRENCY).values_list("pk", flat=True)
         self.assertListEqual(list(rates), [self.usd.pk])
 
@@ -99,3 +99,17 @@ class TestRateManager(TestCase):
     def test_is_exists_false(self):
         rates = Rate.objects.is_exists(date(1986, 1, 1), "XYZ")
         self.assertFalse(rates)
+
+    def test_get_most_expensive(self):
+        rates = Rate.objects.get_most_expensive().values_list("pk", flat=True)
+        self.assertIn(self.most_expensive_pln.pk, rates)
+
+    def test_get_cheapest(self):
+        rates = Rate.objects.get_cheapest().values_list("pk", flat=True)
+        self.assertIn(self.cheapest_pln.pk, rates)
+
+
+class TestNewestWithoutRates(TestCase):
+    def test_empty_rates(self):
+        rates = Rate.objects.newest()
+        self.assertEqual(rates.count(), 0)
