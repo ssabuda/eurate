@@ -27,27 +27,8 @@ I recommend using docker-compose, it is the fastest way to start the application
     docker-compose up
     ```
 
-- run bash in a running container
-
-    ```bash
-    docker-compose exec web bash
-    ```
-
-- run migrations
-
-    ```bash
-    ./manage migrate
-    ```
 
 App is running on [http://localhost:8000/](http://localhost:8000/)
-
-## Create admin account
-
-If you want to use the admin panel, you must first create a super user account. Run command:
-
-```bash
-./manage.py createsuperuser
-```
 
 next follow the instructions. Now you can access into [admin panel](http://localhost:8000/admin/)
 
@@ -104,22 +85,10 @@ example data:
 }
 ```
 
-### Pagination
-
-page size is set to `100`
-
 ### Filters
 
 Two filters for `date` and `currency` are available i.e:
 
 ```text
 http://localhost:8000/api/v1/rates/?currency=USD&date=2020-12-03
-```
-
-## Tests
-Unite test coverage is `94%`
-
-Starting tests command:
-```bash
-./manage.py test
 ```
