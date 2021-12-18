@@ -1,10 +1,44 @@
 from datetime import date
+
 from django.db import models
+from django.db.models.functions import window
 
 from core.models import TimeStampedModel
+from currencies.constants import Price
 
 
 class RateManager(models.Manager):
+    def get_top_rates(self, price: Price):
+        if price.name == Price.EXPENSIVE.name:
+            order_by = [models.F("rate").desc()]
+        elif price.name == Price.CHEAPEST.name:
+            order_by = [models.F("rate").asc()]
+        else:
+            raise NotImplementedError()
+        rates = (
+            Rate.objects.all()
+            .annotate(
+                row_number=models.Window(
+                    expression=window.RowNumber(),
+                    partition_by=[models.F("currency")],
+                    order_by=order_by,
+                )
+            )
+            .order_by("currency")
+        )
+        pks_rates = [
+            v["pk"]
+            for v in list(rates.values("pk", "row_number"))
+            if v["row_number"] == 1
+        ]
+        return Rate.objects.filter(pk__in=pks_rates)
+
+    def get_most_expensive(self):
+        return self.get_top_rates(Price.EXPENSIVE)
+
+    def get_cheapest(self):
+        return self.get_top_rates(Price.CHEAPEST)
+
     def newest(self, **kwargs):
         try:
             newest_date = self.latest("date").date
