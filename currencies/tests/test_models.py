@@ -107,3 +107,9 @@ class TestRateManager(TestCase):
     def test_get_cheapest(self):
         rates = Rate.objects.get_cheapest().values_list("pk", flat=True)
         self.assertIn(self.cheapest_pln.pk, rates)
+
+
+class TestNewestWithoutRates(TestCase):
+    def test_empty_rates(self):
+        rates = Rate.objects.newest()
+        self.assertEqual(rates.count(), 0)

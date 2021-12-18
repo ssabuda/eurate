@@ -11,10 +11,8 @@ class RateManager(models.Manager):
     def get_top_rates(self, price: Price):
         if price.name == Price.EXPENSIVE.name:
             order_by = [models.F("rate").desc()]
-        elif price.name == Price.CHEAPEST.name:
-            order_by = [models.F("rate").asc()]
         else:
-            raise NotImplementedError()
+            order_by = [models.F("rate").asc()]
         rates = (
             Rate.objects.all()
             .annotate(
