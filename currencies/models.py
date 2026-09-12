@@ -66,7 +66,7 @@ class Rate(TimeStampedModel):
         verbose_name = "Currency rate"
         verbose_name_plural = "Currency rates"
         ordering = ("-date", "currency")
-        index_together = ("currency", "date")
+        indexes = [models.Index(fields=["currency", "date"])]
         unique_together = ("currency", "date")
 
     def save(self, *args, **kwargs):
