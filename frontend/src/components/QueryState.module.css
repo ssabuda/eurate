@@ -1,0 +1,12 @@
+.box {
+  background: var(--color-surface);
+  border: 1px dashed var(--color-input-line);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  color: var(--color-muted);
+}

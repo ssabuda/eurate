@@ -1,0 +1,88 @@
+/* Shared building blocks: cards, form fields, buttons, headings. */
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-xl);
+}
+
+.eyebrow {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.lead {
+  max-width: 600px;
+  color: var(--color-muted);
+  font-size: 17px;
+}
+
+.sectionTitle {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.cardTitle {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.hint {
+  font-size: 14px;
+  color: var(--color-subtle);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-muted);
+}
+
+.input,
+.select {
+  height: 44px;
+  border: 1px solid var(--color-input-line);
+  border-radius: var(--radius-md);
+  padding: 0 14px;
+  background: var(--color-surface);
+  font-size: 15px;
+}
+
+.select {
+  padding: 0 12px;
+}
+
+.button {
+  height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--color-input-line);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.button:hover:not(:disabled) {
+  border-color: var(--color-accent);
+}
+
+.button:disabled {
+  color: var(--color-subtle);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.mono {
+  font-family: var(--font-mono);
+}

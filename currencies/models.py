@@ -9,27 +9,26 @@ from currencies.constants import Price
 
 class RateManager(models.Manager):
     def get_top_rates(self, price: Price):
+        # A record is set the first time a rate is reached, so ties (e.g. a
+        # pegged currency) resolve to the earliest date, never at random.
         if price.name == Price.EXPENSIVE.name:
-            order_by = [models.F("rate").desc()]
+            order_by = [models.F("rate").desc(), models.F("date").asc()]
         else:
-            order_by = [models.F("rate").asc()]
-        rates = (
-            Rate.objects.all()
-            .annotate(
+            order_by = [models.F("rate").asc(), models.F("date").asc()]
+        # Filtering on the window runs in the database, so the whole table is
+        # never loaded into Python. Filters chained later (e.g. ?currency=)
+        # go into the inner query, which is safe: the window partitions by currency.
+        return (
+            self.annotate(
                 row_number=models.Window(
                     expression=window.RowNumber(),
                     partition_by=[models.F("currency")],
                     order_by=order_by,
                 )
             )
+            .filter(row_number=1)
             .order_by("currency")
         )
-        pks_rates = [
-            v["pk"]
-            for v in list(rates.values("pk", "row_number"))
-            if v["row_number"] == 1
-        ]
-        return Rate.objects.filter(pk__in=pks_rates)
 
     def get_most_expensive(self):
         return self.get_top_rates(Price.EXPENSIVE)

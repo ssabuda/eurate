@@ -23,6 +23,9 @@ services:
   web:
     build: .
     command: python manage.py runserver 0.0.0.0:8000
+    environment:
+      # `web` is the Host the frontend's dev proxy sends.
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,[::1],web
     volumes:
       - .:/code
     ports:
@@ -32,6 +35,22 @@ services:
         condition: service_completed_successfully
       db:
         condition: service_healthy
+  frontend:
+    image: node:26-alpine
+    # Files written to ./frontend belong to the host user; uid/gid 1000 by
+    # default, otherwise run `UID=$(id -u) GID=$(id -g) docker compose up`.
+    # `npm ci` installs exactly the committed lockfile without rewriting it.
+    user: "${UID:-1000}:${GID:-1000}"
+    working_dir: /app
+    command: sh -c "npm ci && npm run dev"
+    environment:
+      - API_PROXY_TARGET=http://web:8000
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "5173:5173"
+    depends_on:
+      - web
   import_data:
     build: .
     command: python manage.py run_ecb_import

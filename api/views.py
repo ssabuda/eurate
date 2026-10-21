@@ -10,7 +10,10 @@ from .serializers import RateSerializer
 class RateList(ListAPIView):
     queryset = Rate.objects.all()
     serializer_class = RateSerializer
-    filterset_fields = ["currency", "date"]
+    filterset_fields = {
+        "currency": ["exact"],
+        "date": ["exact", "lt", "gte", "lte"],
+    }
 
 
 class RateNewestList(ListAPIView):
