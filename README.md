@@ -74,9 +74,10 @@ frontend/src/
     ```bash
     docker compose run --rm web python manage.py test
     ```
-- frontend (Vitest, the API is mocked so no backend is needed):
+- frontend (Vitest, the API is mocked so no backend is needed). `run` replaces the service's
+  command, so these one-off commands install dependencies with `npm ci` first:
     ```bash
-    docker compose run --rm --no-deps frontend npm test
+    docker compose run --rm --no-deps frontend sh -c "npm ci && npm test"
     ```
 - frontend in watch mode, while `docker compose up` is running:
     ```bash
@@ -84,7 +85,7 @@ frontend/src/
     ```
 - frontend lint, tests and production build – the same as CI:
     ```bash
-    docker compose run --rm --no-deps frontend sh -c "npm run lint && npm test && npm run build"
+    docker compose run --rm --no-deps frontend sh -c "npm ci && npm run lint && npm test && npm run build"
     ```
 
 ## Download currency exchange rates as CSV file
