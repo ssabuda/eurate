@@ -1,0 +1,62 @@
+.table {
+  display: flex;
+  flex-direction: column;
+}
+
+.head {
+  padding: 20px 24px 12px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.jump {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.scroll {
+  overflow-x: auto;
+}
+
+.scroll table {
+  width: 100%;
+  min-width: 420px;
+  border-collapse: collapse;
+}
+
+.scroll th {
+  padding: 10px 24px;
+  border-bottom: 1px solid var(--color-line);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-subtle);
+  text-align: left;
+}
+
+.scroll td {
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--color-line-soft);
+}
+
+.scroll th.num,
+.scroll td.num {
+  text-align: right;
+}
+
+.pager {
+  padding: 14px 24px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.pagerButtons {
+  display: flex;
+  gap: 8px;
+}

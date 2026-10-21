@@ -1,0 +1,50 @@
+.converter {
+  flex: 1 1 360px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.amount {
+  height: 48px;
+  font-family: var(--font-mono);
+  font-size: 18px;
+}
+
+.error {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-down);
+}
+
+.amount[aria-invalid="true"] {
+  border-color: var(--color-down);
+}
+
+.result {
+  border-top: 1px solid var(--color-line-soft);
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.resultLabel {
+  font-size: 13px;
+  color: var(--color-subtle);
+}
+
+.resultValue {
+  font-family: var(--font-mono);
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--color-accent);
+  overflow-wrap: anywhere;
+}
+
+.resultCode {
+  font-size: 18px;
+  color: var(--color-ink);
+}

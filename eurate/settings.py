@@ -44,7 +44,13 @@ SECRET_KEY = get_secret_key(BASE_DIR)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# Comma-separated, e.g. "localhost,127.0.0.1,web". Empty keeps Django's
+# DEBUG default, which allows only localhost.
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(",")
+    if host.strip()
+]
 
 
 # Application definition
