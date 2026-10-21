@@ -70,23 +70,47 @@ frontend/src/
 
 ## Tests
 
-- backend:
+### Backend
+
+```bash
+docker compose run --rm web python manage.py test
+```
+### Frontend
+
+Vitest with a mocked API, so no backend is needed. Which command to use depends on whether
+`docker compose up` is running.
+
+**While `docker compose up` is running** – use `exec`; the running container already installed
+dependencies on start:
+
+- tests:
     ```bash
-    docker compose run --rm web python manage.py test
+    docker compose exec frontend npm test
     ```
-- frontend (Vitest, the API is mocked so no backend is needed). `run` replaces the service's
-  command, so these one-off commands install dependencies with `npm ci` first:
-    ```bash
-    docker compose run --rm --no-deps frontend sh -c "npm ci && npm test"
-    ```
-- frontend in watch mode, while `docker compose up` is running:
+- tests in watch mode (rerun on every save):
     ```bash
     docker compose exec frontend npm run test:watch
     ```
-- frontend lint, tests and production build – the same as CI:
+- lint, tests and production build – the same as CI:
+    ```bash
+    docker compose exec frontend sh -c "npm run lint && npm test && npm run build"
+    ```
+
+**When nothing is running** – use `run`. It replaces the service's command, so these one-off
+commands install dependencies with `npm ci` first:
+
+- tests:
+    ```bash
+    docker compose run --rm --no-deps frontend sh -c "npm ci && npm test"
+    ```
+- lint, tests and production build – the same as CI:
     ```bash
     docker compose run --rm --no-deps frontend sh -c "npm ci && npm run lint && npm test && npm run build"
     ```
+
+Don't use the `run` commands while `docker compose up` is running: `frontend/node_modules` is
+shared through the bind mount, and `npm ci` deletes it first, which breaks the running dev server
+until it is restarted.
 
 ## Download currency exchange rates as CSV file
 
