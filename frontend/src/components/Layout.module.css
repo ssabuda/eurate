@@ -83,9 +83,12 @@
   font-weight: 600;
 }
 
-.source {
-  font-size: 13px;
-  color: var(--color-subtle);
+/* Narrow screens: the base switch stays beside the logo, the nav wraps below. */
+@media (max-width: 760px) {
+  .nav {
+    order: 3;
+    flex-basis: 100%;
+  }
 }
 
 .main {

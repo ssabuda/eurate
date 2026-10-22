@@ -245,6 +245,39 @@ describe("CurrencyPage", () => {
   it("says when the currency is unknown", async () => {
     setup("/currency/XYZ");
     expect(await screen.findByText(/No rates for “XYZ”/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "See all currencies" })).toHaveAttribute("href", "/");
+    expect(screen.getByRole("link", { name: "See all currencies" })).toHaveAttribute("href", "/?base=EUR");
+  });
+
+  it("shows the pair against another base", async () => {
+    const { fetch } = setup("/currency/USD?base=PLN");
+    expect(await screen.findByText("USD/PLN")).toBeInTheDocument();
+    expect(screen.getByText(/1 USD in PLN/)).toBeInTheDocument();
+    expect(await screen.findByRole("img", { name: /USD\/PLN over three months/ })).toBeInTheDocument();
+    expect(await screen.findByRole("columnheader", { name: "Rate (1 USD in PLN)" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Today's rates" })).toHaveAttribute("href", "/?base=PLN");
+    for (const endpoint of ["newest", "rates", "topprice", "lowestprice"]) {
+      for (const params of requestsTo(fetch, endpoint)) {
+        expect(params.get("base")).toBe("PLN");
+      }
+    }
+  });
+
+  it("opens the default currency instead of the base itself", async () => {
+    setup("/currency/PLN?base=PLN");
+    expect(await screen.findByRole("heading", { level: 1, name: "US dollar" })).toBeInTheDocument();
+    expect(screen.getByText("USD/PLN")).toBeInTheDocument();
+  });
+
+  it("opens the euro instead of the dollar when the dollar is the base", async () => {
+    mockApi({
+      newest: NEWEST,
+      rates: (params) =>
+        params.get("currency") === "EUR" ? [{ currency: "EUR", date: NEWEST_DATE, rate: "1.1234" }] : [],
+      topprice: [],
+      lowestprice: [],
+    });
+    renderRoute(<CurrencyPage />, { path: "/currency/:code", url: "/currency/USD?base=USD" });
+    expect(await screen.findByRole("heading", { level: 1, name: "Euro" })).toBeInTheDocument();
+    expect(screen.getByText("EUR/USD")).toBeInTheDocument();
   });
 });

@@ -1,3 +1,5 @@
+import { BASE_CURRENCY } from "../lib/currencies";
+
 const API_ROOT = "/api/v1";
 
 /**
@@ -11,9 +13,13 @@ const toRate = (row) => ({
   rate: Number(row.rate),
 });
 
-/** @returns {Promise<RatePage>} */
-async function getList(endpoint, params = {}) {
+/**
+ * Rates are against `base`; the euro, the API's default, is left out of the URL.
+ * @returns {Promise<RatePage>}
+ */
+async function getList(endpoint, base, params = {}) {
   const query = new URLSearchParams();
+  if (base && base !== BASE_CURRENCY) query.set("base", base);
   for (const [key, value] of Object.entries(params)) {
     if (value !== undefined && value !== null && value !== "") {
       query.set(key, value);
@@ -23,7 +29,9 @@ async function getList(endpoint, params = {}) {
     headers: { Accept: "application/json" },
   });
   if (!response.ok) {
-    throw new Error(`Request to ${endpoint} failed (${response.status})`);
+    const error = new Error(`Request to ${endpoint} failed (${response.status})`);
+    error.status = response.status;
+    throw error;
   }
   const data = await response.json();
   return { count: data.count, results: data.results.map(toRate) };
@@ -32,22 +40,22 @@ async function getList(endpoint, params = {}) {
 // The ECB publishes ~30 currencies, so 200 always fits one page.
 const ALL_CURRENCIES = 200;
 
-export const getNewest = () => getList("newest", { limit: ALL_CURRENCIES });
+export const getNewest = (base) => getList("newest", base, { limit: ALL_CURRENCIES });
 
 /** Record highs, one per currency (or only `currency`'s). */
-export const getTopPrice = (currency) =>
-  getList("topprice", { currency, limit: ALL_CURRENCIES });
+export const getTopPrice = (base, currency) =>
+  getList("topprice", base, { currency, limit: ALL_CURRENCIES });
 
 /** Record lows, one per currency (or only `currency`'s). */
-export const getLowestPrice = (currency) =>
-  getList("lowestprice", { currency, limit: ALL_CURRENCIES });
+export const getLowestPrice = (base, currency) =>
+  getList("lowestprice", base, { currency, limit: ALL_CURRENCIES });
 
 /**
  * Rates ordered newest first.
  * @param {{ currency?: string, date?: string, dateLt?: string, dateGte?: string,
  *           dateLte?: string, limit?: number, offset?: number }} filters
  */
-export const getRates = ({
+export const getRates = (base, {
   currency,
   date,
   dateLt,
@@ -56,7 +64,7 @@ export const getRates = ({
   limit,
   offset,
 } = {}) =>
-  getList("rates", {
+  getList("rates", base, {
     currency,
     date,
     date__lt: dateLt,

@@ -1,10 +1,13 @@
 import { Link } from "react-router-dom";
 
 import { useRecords } from "../api/hooks";
+import BaseNote from "../components/BaseNote";
 import QueryState from "../components/QueryState";
 import StatTile, { StatGrid } from "../components/StatTile";
+import { baseName, quotesPrice } from "../lib/currencies";
 import { addDays, formatCount, formatDate, formatRate } from "../lib/format";
 import { matchesQuery } from "../lib/rates";
+import useBase, { withBase } from "../lib/useBase";
 import useUrlState from "../lib/useUrlState";
 import ui from "../styles/ui.module.css";
 import styles from "./RecordsPage.module.css";
@@ -36,7 +39,9 @@ const countRecent = (records, newestDate, days) => {
 };
 
 export default function RecordsPage() {
-  const { records, date, isLoading, error, refetch } = useRecords();
+  const [base] = useBase();
+  const name = baseName(base);
+  const { records, date, isLoading, error, refetch } = useRecords(base);
   const [{ q: query, sort: sortParam }, setParam] = useUrlState({ q: "", sort: "code" });
   // hasOwn, not `SORTS[x]`: ?sort=__proto__ must not reach Array.sort.
   const sort = Object.hasOwn(SORTS, sortParam) ? sortParam : "code";
@@ -49,11 +54,13 @@ export default function RecordsPage() {
     <>
       <section className={styles.intro}>
         <p className={ui.eyebrow}>Records</p>
-        <h1 className={styles.title}>Where is the euro today, against its history?</h1>
+        <h1 className={styles.title}>Where is the {name} today, against its history?</h1>
         <p className={ui.lead}>
-          The strongest and weakest euro fixing stored for every currency, and where today's rate
-          sits between them.
+          {quotesPrice(base)
+            ? `The highest and lowest price in ${name} stored for every currency, and where today's price sits between them.`
+            : `The strongest and weakest ${name} rate stored for every currency, and where today's rate sits between them.`}
         </p>
+        <BaseNote base={base} />
       </section>
 
       <QueryState
@@ -128,7 +135,7 @@ export default function RecordsPage() {
                   {rows.map((r) => (
                     <tr key={r.code}>
                       <td>
-                        <Link to={`/currency/${r.code}`} className={styles.currency}>
+                        <Link to={withBase(`/currency/${r.code}`, base)} className={styles.currency}>
                           <span className={styles.code}>{r.code}</span>
                           <span className={styles.name}>{r.name}</span>
                         </Link>
@@ -155,8 +162,9 @@ export default function RecordsPage() {
             </div>
           )}
           <p className={styles.footnote}>
-            A position near 100% means one euro buys more of that currency than ever stored — the
-            euro is historically strong against it.
+            {quotesPrice(base)
+              ? `A position near 100% means the currency costs more ${name} than ever stored — the ${name} is historically weak against it.`
+              : `A position near 100% means one ${name} buys more of that currency than ever stored — the ${name} is historically strong against it.`}
           </p>
         </section>
       </QueryState>

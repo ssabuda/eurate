@@ -1,15 +1,17 @@
 import { Link, Navigate, useLocation, useNavigate, useParams } from "react-router-dom";
 
 import { useCurrencyRecord, useHistory, useLatestRate, useNewest } from "../api/hooks";
+import BaseNote from "../components/BaseNote";
 import ChangeChip from "../components/ChangeChip";
 import FixingsTable from "../components/FixingsTable";
 import HistoryChart from "../components/HistoryChart";
 import QueryState from "../components/QueryState";
 import SegmentedControl from "../components/SegmentedControl";
 import StatTile, { StatGrid } from "../components/StatTile";
-import { currencyName } from "../lib/currencies";
+import { currencyName, defaultCurrency, pairOf, rateUnit } from "../lib/currencies";
 import { addDays, formatDate, formatLongDate, formatPercent, formatRate } from "../lib/format";
 import { percentChange } from "../lib/rates";
+import useBase, { withBase } from "../lib/useBase";
 import useUrlState from "../lib/useUrlState";
 import ui from "../styles/ui.module.css";
 import styles from "./CurrencyPage.module.css";
@@ -30,11 +32,12 @@ export default function CurrencyPage() {
   const code = rawCode.toUpperCase();
   const navigate = useNavigate();
   const { search } = useLocation();
+  const [base] = useBase();
 
   const [{ range: rangeParam }, setParam] = useUrlState({ range: DEFAULT_RANGE });
   const range = RANGES.find((r) => r.value === rangeParam) ?? RANGES.find((r) => r.value === DEFAULT_RANGE);
 
-  const newest = useNewest();
+  const newest = useNewest(base);
   const newestDate = newest.data?.results[0]?.date ?? null;
 
   // A currency exists when it has any stored rate, not only when it is in
@@ -42,7 +45,7 @@ export default function CurrencyPage() {
   // While switching currency the previous one's data is kept as a placeholder,
   // so the page (and the picker the user is on) stays in place; it is never
   // shown as the new currency's.
-  const latest = useLatestRate(code);
+  const latest = useLatestRate(base, code);
   const known = Boolean(latest.data);
   const current = latest.isPlaceholderData ? null : latest.data;
   const discontinued = Boolean(current) && newestDate !== null && current.date < newestDate;
@@ -54,11 +57,15 @@ export default function CurrencyPage() {
   // Ranges end at the currency's own latest fixing, so a discontinued
   // currency still shows its last months instead of an empty chart.
   const dateGte = range.days && current ? addDays(current.date, -range.days) : null;
-  const history = useHistory(current ? code : null, dateGte);
-  const { data: record } = useCurrencyRecord(current ? code : null);
+  const history = useHistory(base, current ? code : null, dateGte);
+  const { data: record } = useCurrencyRecord(base, current ? code : null);
 
   if (rawCode !== code) {
     return <Navigate to={currencyPath(code, search)} replace />;
+  }
+  // A currency has no rates against itself: open the one History opens on.
+  if (code === base) {
+    return <Navigate to={currencyPath(defaultCurrency(base), search)} replace />;
   }
 
   // The chart may show the previous range (dimmed) while a new one loads,
@@ -68,6 +75,7 @@ export default function CurrencyPage() {
   const values = period.map((d) => d.rate);
 
   const pickCurrency = (next) => navigate(currencyPath(next, search));
+  const pair = pairOf(base, code);
 
   return (
     <QueryState
@@ -80,14 +88,14 @@ export default function CurrencyPage() {
       empty={!known}
       emptyMessage={
         <>
-          No rates for “{code}”. <Link to="/">See all currencies</Link>
+          No rates for “{code}”. <Link to={withBase("/", base)}>See all currencies</Link>
         </>
       }
     >
       {known && (
         <>
           <nav aria-label="Breadcrumb" className={styles.breadcrumb}>
-            <Link to="/">Today's rates</Link>
+            <Link to={withBase("/", base)}>Today's rates</Link>
             <span aria-hidden="true">/</span>
             <span aria-current="page">{code}</span>
           </nav>
@@ -95,7 +103,7 @@ export default function CurrencyPage() {
           <section className={styles.summary}>
             <div className={styles.heading}>
               <div className={styles.titleRow}>
-                <span className={styles.pair}>EUR/{code}</span>
+                <span className={styles.pair}>{pair}</span>
                 <h1 className={styles.title}>{currencyName(code)}</h1>
               </div>
               {current ? (
@@ -105,7 +113,7 @@ export default function CurrencyPage() {
                     <ChangeChip value={current.change} suffix="vs previous fixing" size="lg" />
                   </div>
                   <p className={ui.hint}>
-                    1 EUR in {code} · fixing of {formatLongDate(current.date)}
+                    {rateUnit(base, code)} · fixing of {formatLongDate(current.date)}
                     {discontinued && " · no longer published by the ECB"}
                   </p>
                 </>
@@ -114,6 +122,7 @@ export default function CurrencyPage() {
                   Loading {code}…
                 </p>
               )}
+              <BaseNote base={base} />
             </div>
             <div className={ui.field}>
               <label htmlFor="currency" className={ui.label}>
@@ -147,8 +156,8 @@ export default function CurrencyPage() {
                   data={series}
                   label={
                     period.length > 1
-                      ? `EUR/${code} over ${range.text}, from ${formatRate(period[0].rate)} to ${formatRate(period[period.length - 1].rate)}`
-                      : `EUR/${code}`
+                      ? `${pair} over ${range.text}, from ${formatRate(period[0].rate)} to ${formatRate(period[period.length - 1].rate)}`
+                      : pair
                   }
                 />
               </div>
@@ -177,7 +186,7 @@ export default function CurrencyPage() {
             />
           </StatGrid>
 
-          <FixingsTable key={code} currency={code} />
+          <FixingsTable key={`${base}/${code}`} currency={code} base={base} />
         </>
       )}
     </QueryState>

@@ -9,3 +9,6 @@ ECB_XML_NAMESPACE = {
 class Price(Enum):
     CHEAPEST = "cheapest"
     EXPENSIVE = "expensive"
+
+# Every ECB rate is quoted against the euro, so it is the default base.
+EUR = "EUR"

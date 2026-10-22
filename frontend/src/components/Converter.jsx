@@ -1,26 +1,31 @@
 import { useId, useState } from "react";
 
-import { DEFAULT_CURRENCY } from "../lib/currencies";
+import { defaultCurrency, quotesPrice } from "../lib/currencies";
 import { formatAmount, formatRate } from "../lib/format";
 import ui from "../styles/ui.module.css";
 import styles from "./Converter.module.css";
 
-export default function Converter({ rates }) {
+/**
+ * Converts between `base` and one of `rates`. Rates against the euro convert
+ * euros into the currency; prices in another base convert the currency into it.
+ */
+export default function Converter({ rates, base }) {
   const id = useId();
   const [amount, setAmount] = useState("100");
-  const [code, setCode] = useState(DEFAULT_CURRENCY);
+  const [code, setCode] = useState(() => defaultCurrency(base));
 
   const target = rates.find((r) => r.code === code) ?? rates[0];
-  const euros = Number(amount);
+  const [from, to] = quotesPrice(base) ? [target.code, base] : [base, target.code];
+  const value = Number(amount);
   // Empty counts as 0; anything else that isn't a non-negative number is flagged.
-  const invalid = amount.trim() !== "" && !(Number.isFinite(euros) && euros >= 0);
+  const invalid = amount.trim() !== "" && !(Number.isFinite(value) && value >= 0);
 
   return (
     <form className={`${ui.card} ${styles.converter}`} onSubmit={(e) => e.preventDefault()}>
       <h2 className={ui.cardTitle}>Converter</h2>
       <div className={ui.field}>
         <label htmlFor={`${id}-amount`} className={ui.label}>
-          Amount in EUR
+          Amount in {from}
         </label>
         <input
           id={`${id}-amount`}
@@ -42,7 +47,7 @@ export default function Converter({ rates }) {
       </div>
       <div className={ui.field}>
         <label htmlFor={`${id}-currency`} className={ui.label}>
-          Convert to
+          {quotesPrice(base) ? "Currency" : "Convert to"}
         </label>
         <select
           id={`${id}-currency`}
@@ -60,14 +65,16 @@ export default function Converter({ rates }) {
       <output htmlFor={`${id}-amount ${id}-currency`} className={styles.result} aria-live="polite">
         {!invalid && (
           <>
-            <span className={styles.resultLabel}>{formatAmount(euros)} EUR =</span>
+            <span className={styles.resultLabel}>
+              {formatAmount(value)} {from} =
+            </span>
             <span className={styles.resultValue}>
-              {formatAmount(euros * target.rate)} <span className={styles.resultCode}>{target.code}</span>
+              {formatAmount(value * target.rate)} <span className={styles.resultCode}>{to}</span>
             </span>
           </>
         )}
         <span className={styles.resultLabel}>
-          Rate {formatRate(target.rate)} · 1 {target.code} = {formatRate(1 / target.rate)} EUR
+          Rate {formatRate(target.rate)} · 1 {to} = {formatRate(1 / target.rate)} {from}
         </span>
       </output>
     </form>

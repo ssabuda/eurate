@@ -16,9 +16,14 @@ import "./styles/global.css";
 import App from "./App";
 
 // ECB rates change once a day, so cached data stays fresh for a while.
+// A 4xx (e.g. an unknown base) won't change on retry, so only other errors are retried.
 const queryClient = new QueryClient({
   defaultOptions: {
-    queries: { staleTime: 5 * 60 * 1000, refetchOnWindowFocus: false },
+    queries: {
+      staleTime: 5 * 60 * 1000,
+      refetchOnWindowFocus: false,
+      retry: (failures, error) => !(error.status >= 400 && error.status < 500) && failures < 3,
+    },
   },
 });
 

@@ -9,7 +9,7 @@ const number = (value, digits) =>
 /** Rates are stored with 4 decimals; large values read better with 2. */
 export const rateDigits = (rate) => (rate >= 50 ? 2 : 4);
 
-// Tiny rates (e.g. 1 IDR in EUR) would round to 0.0001 at 4 decimals,
+// Tiny rates (e.g. 1 IDR in EUR, or many cross rates) would round to 0.0001 at 4 decimals,
 // so they keep 4 significant digits instead.
 const TINY_RATE = 0.01;
 
@@ -48,6 +48,8 @@ export const formatLongDate = (isoDate) =>
     year: "numeric",
     timeZone: "UTC",
   });
+
+export const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1);
 
 export const formatCount = (count, singular, plural) =>
   `${count.toLocaleString(LOCALE)} ${count === 1 ? singular : plural}`;
