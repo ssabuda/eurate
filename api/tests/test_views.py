@@ -158,6 +158,95 @@ class TestRateTopAndLowestPrice(APITestCase):
         self.assertEqual(data["results"][0]["rate"], "4.0000")
 
 
+class TestRateBase(APITestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        for day, usd, pln in ((1, "1.0800", "4.3000"), (2, "1.1000", "4.4000")):
+            RateFactoryUSD.create(date=date(2026, 10, day), rate=usd)
+            RateFactoryPLN.create(date=date(2026, 10, day), rate=pln)
+        # No PLN fixing on this date, so it has no rates against PLN.
+        RateFactoryUSD.create(date=date(2026, 10, 3), rate="1.2000")
+
+    def get_results(self, name, query):
+        response = self.client.get(f"{reverse(name)}?{query}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        return [(r["currency"], r["date"], r["rate"]) for r in response.data["results"]]
+
+    def test_cross_rates(self):
+        self.assertEqual(
+            self.get_results("api:rates", "base=PLN"),
+            [
+                ("EUR", "2026-10-02", "4.4000"),
+                ("USD", "2026-10-02", "4.0000"),
+                ("EUR", "2026-10-01", "4.3000"),
+                ("USD", "2026-10-01", "3.98148"),
+            ],
+        )
+
+    def test_euro_against_base_is_the_stored_fixing(self):
+        # A 7-digit fixing would lose its last digit to the 6 kept for cross rates.
+        RateFactory.create(currency="IDR", date=date(2026, 10, 1), rate="17123.4500")
+        self.assertIn(
+            ("EUR", "2026-10-01", "17123.4500"),
+            self.get_results("api:rates", "base=IDR"),
+        )
+
+    def test_base_is_case_insensitive(self):
+        self.assertEqual(
+            self.get_results("api:rates", "base=pln"),
+            self.get_results("api:rates", "base=PLN"),
+        )
+
+    def test_default_base_is_euro(self):
+        self.assertEqual(
+            self.get_results("api:rates", "base=EUR"),
+            self.get_results("api:rates", ""),
+        )
+        self.assertIn(
+            ("PLN", "2026-10-01", "4.3000"), self.get_results("api:rates", "")
+        )
+
+    def test_filter_euro_against_base(self):
+        self.assertEqual(
+            self.get_results("api:rates", "base=PLN&currency=eur"),
+            [("EUR", "2026-10-02", "4.4000"), ("EUR", "2026-10-01", "4.3000")],
+        )
+
+    def test_filter_base_itself_is_empty(self):
+        self.assertEqual(self.get_results("api:rates", "base=PLN&currency=PLN"), [])
+
+    def test_filter_euro_against_euro_is_empty(self):
+        self.assertEqual(self.get_results("api:rates", "currency=EUR"), [])
+
+    def test_newest(self):
+        self.assertEqual(
+            self.get_results("api:newest", "base=PLN"),
+            [("EUR", "2026-10-02", "4.4000"), ("USD", "2026-10-02", "4.0000")],
+        )
+
+    def test_records(self):
+        self.assertEqual(
+            self.get_results("api:topprice", "base=PLN"),
+            [("EUR", "2026-10-02", "4.4000"), ("USD", "2026-10-02", "4.0000")],
+        )
+        self.assertEqual(
+            self.get_results("api:lowestprice", "base=PLN"),
+            [("EUR", "2026-10-01", "4.3000"), ("USD", "2026-10-01", "3.98148")],
+        )
+
+    def test_records_filter_currency(self):
+        self.assertEqual(
+            self.get_results("api:topprice", "base=PLN&currency=EUR"),
+            [("EUR", "2026-10-02", "4.4000")],
+        )
+
+    def test_unknown_base(self):
+        for name in ("api:rates", "api:newest", "api:topprice", "api:lowestprice"):
+            response = self.client.get(f"{reverse(name)}?base=XYZ")
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
 class TestApiRootVIew(APITestCase):
     def test_status(self):
         response = self.client.get(reverse("api:root"))

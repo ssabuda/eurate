@@ -13,6 +13,9 @@ via API and in a web frontend with three screens:
 - **History** – a chart and daily fixings of one currency, with the highest and lowest rate on record
 - **Records** – record high and low for every currency and where today's rate sits between them
 
+The **Base** switch in the header shows every screen against another currency, e.g. the Polish zloty
+(see [Base currency](#base-currency)). The choice is kept in the URL (`?base=PLN`) and remembered in the browser.
+
 ## Installation
 
 I recommend using Docker Compose, it is the fastest way to start the application:
@@ -158,13 +161,39 @@ example data:
 
 ### Filters
 
-All endpoints filter by `currency`. `rates` also filters by `date`, and by a date range with
+All endpoints filter by `currency` (case-insensitive). `rates` also filters by `date`, and by a date range with
 `date__gte`, `date__lte` and `date__lt`, i.e:
 
 ```text
 http://localhost:8000/api/v1/rates/?currency=USD&date=2020-12-03
 http://localhost:8000/api/v1/rates/?currency=USD&date__gte=2020-01-01&date__lte=2020-12-31
 ```
+
+### Base currency
+
+The ECB publishes rates against the euro only. All endpoints take an optional `base` (case-insensitive,
+`EUR` by default) and return cross rates against it, computed from the ECB fixings of the same day:
+
+```text
+http://localhost:8000/api/v1/newest/?base=PLN
+http://localhost:8000/api/v1/rates/?base=PLN&currency=USD&date__gte=2026-01-01
+http://localhost:8000/api/v1/topprice/?base=PLN
+```
+
+- **without `base`** (or `base=EUR`) – the ECB data as published: how much of a currency one euro buys,
+  e.g. `USD 1.1205` means 1 EUR = 1.1205 USD
+- **any other base** – the price of one unit of a currency in the base, the way most countries quote rates
+  (e.g. the NBP in Poland): with `base=PLN`, `USD 3.8996` means 1 USD = 3.8996 PLN.
+  Computed as *rate of the base / rate of the currency*, rounded to 6 significant digits
+  (padded with zeros towards 4 decimals, like the stored rates, but never past those 6 digits)
+- the base itself is not listed, and the euro is: `EUR 4.3695` means 1 EUR = 4.3695 PLN. It is the
+  stored ECB fixing of the base, not rounded; filter it with `currency=EUR`
+- days the base was not fixed on are left out
+- `topprice` and `lowestprice` are the highest and lowest of these values, so with `base=PLN` they are
+  the most and least a currency has cost in zloty
+- an unknown base returns `400 Bad Request`
+
+These are derived rates, not official ECB reference rates.
 
 ### Pagination
 

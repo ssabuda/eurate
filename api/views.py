@@ -1,52 +1,55 @@
+from functools import cached_property
+
 from rest_framework.decorators import api_view
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
+from currencies.constants import EUR
 from currencies.models import Rate
+from .filters import CurrencyFilterSet, RateFilterSet, requested_base
 from .serializers import RateSerializer
 
 
-class RateList(ListAPIView):
-    queryset = Rate.objects.all()
-    serializer_class = RateSerializer
-    filterset_fields = {
-        "currency": ["exact"],
-        "date": ["exact", "lt", "gte", "lte"],
-    }
+class BaseCurrencyMixin:
+    """Rates against `?base=` (EUR when left out) instead of the euro."""
 
-
-class RateNewestList(ListAPIView):
     model = Rate
     serializer_class = RateSerializer
-    filterset_fields = [
-        "currency",
-    ]
+    filterset_class = CurrencyFilterSet
+
+    @cached_property
+    def base(self) -> str:
+        base = requested_base(self.request)
+        if base != EUR and not self.model.objects.filter(currency=base).exists():
+            raise ValidationError({"base": f"No rates stored for {base}."})
+        return base
+
+    def get_serializer_context(self):
+        return {**super().get_serializer_context(), "base": self.base}
+
+
+class RateList(BaseCurrencyMixin, ListAPIView):
+    filterset_class = RateFilterSet
 
     def get_queryset(self):
-        return self.model.objects.newest()
+        return self.model.objects.in_base(self.base)
 
 
-class RateTopPriceList(ListAPIView):
-    model = Rate
-    serializer_class = RateSerializer
-    filterset_fields = [
-        "currency",
-    ]
-
+class RateNewestList(BaseCurrencyMixin, ListAPIView):
     def get_queryset(self):
-        return self.model.objects.get_most_expensive()
+        return self.model.objects.newest(self.base)
 
 
-class RateLowestPriceList(ListAPIView):
-    model = Rate
-    serializer_class = RateSerializer
-    filterset_fields = [
-        "currency",
-    ]
-
+class RateTopPriceList(BaseCurrencyMixin, ListAPIView):
     def get_queryset(self):
-        return self.model.objects.get_cheapest()
+        return self.model.objects.get_most_expensive(self.base)
+
+
+class RateLowestPriceList(BaseCurrencyMixin, ListAPIView):
+    def get_queryset(self):
+        return self.model.objects.get_cheapest(self.base)
 
 
 @api_view(["GET"])

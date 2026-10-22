@@ -58,7 +58,7 @@ describe("TodayPage", () => {
     setup();
     const usd = await screen.findByRole("link", { name: /USD/ });
     expect(usd).toHaveTextContent("+10.00%");
-    expect(usd).toHaveAttribute("href", "/currency/USD");
+    expect(usd).toHaveAttribute("href", "/currency/USD?base=EUR");
   });
 
   it("filters by search and sorts by biggest move", async () => {
@@ -101,5 +101,35 @@ describe("TodayPage", () => {
     renderRoute(<TodayPage />);
     expect(await screen.findByRole("alert")).toHaveTextContent("Could not load rates");
     expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument();
+  });
+
+  it("shows rates against another base", async () => {
+    const { fetch, user } = setup("/?base=PLN");
+    expect(
+      await screen.findByRole("heading", { name: /Polish zloty exchange rates for 21 October 2026/ }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Prices in Polish zloty · cross rates derived/)).toBeInTheDocument();
+    expect(screen.getByText(/price of one unit of a currency in Polish zloty/)).toBeInTheDocument();
+    expect(screen.getByText("Prices in PLN")).toBeInTheDocument();
+    for (const endpoint of ["newest", "rates"]) {
+      for (const params of requestsTo(fetch, endpoint)) {
+        expect(params.get("base")).toBe("PLN");
+      }
+    }
+    expect(screen.getByRole("link", { name: /USD/ })).toHaveAttribute("href", "/currency/USD?base=PLN");
+
+    // Prices in PLN convert the currency into zloty.
+    await user.selectOptions(screen.getByLabelText("Currency"), "USD");
+    const amount = screen.getByLabelText("Amount in USD");
+    await user.clear(amount);
+    await user.type(amount, "10");
+    expect(screen.getByRole("status")).toHaveTextContent("10.00 USD =11.00 PLN");
+    expect(screen.getByRole("status")).toHaveTextContent("1 PLN = 0.9091 USD");
+  });
+
+  it("says nothing about cross rates for the euro", async () => {
+    setup();
+    await screen.findByRole("heading", { name: /Euro exchange rates/ });
+    expect(screen.queryByText(/cross rates derived/)).not.toBeInTheDocument();
   });
 });

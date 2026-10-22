@@ -1,6 +1,7 @@
 import { useId, useState } from "react";
 
 import { useFixingsPage } from "../api/hooks";
+import { rateUnit } from "../lib/currencies";
 import { formatCount, formatDate, formatRate } from "../lib/format";
 import { percentChange } from "../lib/rates";
 import ui from "../styles/ui.module.css";
@@ -10,12 +11,12 @@ import styles from "./FixingsTable.module.css";
 
 const PAGE_SIZE = 10;
 
-/** Paginated daily fixings of one currency, newest first. */
-export default function FixingsTable({ currency }) {
+/** Paginated daily fixings of one currency against `base`, newest first. */
+export default function FixingsTable({ currency, base }) {
   const id = useId();
   const [page, setPage] = useState(0);
   const [dateLte, setDateLte] = useState("");
-  const { data, isPending, error, refetch } = useFixingsPage(currency, {
+  const { data, isPending, error, refetch } = useFixingsPage(base, currency, {
     pageSize: PAGE_SIZE,
     page,
     dateLte,
@@ -74,7 +75,7 @@ export default function FixingsTable({ currency }) {
             <thead>
               <tr>
                 <th scope="col">Date</th>
-                <th scope="col" className={styles.num}>Rate (1 EUR)</th>
+                <th scope="col" className={styles.num}>Rate ({rateUnit(base, currency)})</th>
                 <th scope="col" className={styles.num}>Day change</th>
               </tr>
             </thead>

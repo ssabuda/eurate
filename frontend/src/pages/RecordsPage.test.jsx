@@ -2,7 +2,7 @@ import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
-import { mockApi, renderRoute } from "../test/render";
+import { mockApi, renderRoute, requestsTo } from "../test/render";
 import RecordsPage from "./RecordsPage";
 
 const NEWEST = [
@@ -58,7 +58,7 @@ describe("RecordsPage", () => {
 
   it("links every currency to its history", async () => {
     setup();
-    expect(await screen.findByRole("link", { name: /PLN/ })).toHaveAttribute("href", "/currency/PLN");
+    expect(await screen.findByRole("link", { name: /PLN/ })).toHaveAttribute("href", "/currency/PLN?base=EUR");
   });
 
   it("highlights the currencies closest to their record high and low", async () => {
@@ -130,5 +130,22 @@ describe("RecordsPage", () => {
   it("explains how to import data when the database is empty", async () => {
     setup("/records", { newest: [], topprice: [], lowestprice: [] });
     expect(await screen.findByText(/No rates yet/)).toBeInTheDocument();
+  });
+
+  it("shows records against another base", async () => {
+    const fetch = mockApi({ newest: NEWEST, topprice: HIGHS, lowestprice: LOWS });
+    renderRoute(<RecordsPage />, { path: "/records", url: "/records?base=PLN" });
+    expect(
+      screen.getByRole("heading", { name: "Where is the Polish zloty today, against its history?" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/highest and lowest price in Polish zloty/)).toBeInTheDocument();
+    await screen.findByRole("table");
+    expect(screen.getByText(/costs more Polish zloty than ever stored/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /USD/ })).toHaveAttribute("href", "/currency/USD?base=PLN");
+    for (const endpoint of ["newest", "topprice", "lowestprice"]) {
+      for (const params of requestsTo(fetch, endpoint)) {
+        expect(params.get("base")).toBe("PLN");
+      }
+    }
   });
 });
