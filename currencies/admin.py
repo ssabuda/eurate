@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from core.admin import export_to_csv
+
 from .models import Rate
 
 

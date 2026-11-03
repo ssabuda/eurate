@@ -8,6 +8,7 @@ from rest_framework.reverse import reverse
 
 from currencies.constants import EUR
 from currencies.models import Rate
+
 from .filters import CurrencyFilterSet, RateFilterSet, requested_base
 from .serializers import RateSerializer
 

@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
+
 import hashlib
 import os
 import uuid
@@ -24,9 +25,10 @@ def get_secret_key(base_dir="."):
 
     path = os.path.join(base_dir, ".secret.key")
     try:
-        secret_key = open(path).read()
+        with open(path) as key_file:
+            secret_key = key_file.read()
         assert secret_key, "Wrong secret key"
-    except (IOError, AssertionError):
+    except (OSError, AssertionError):
         secret_key = gen_key(path)
     return secret_key
 
@@ -141,7 +143,7 @@ if os.environ.get("GITHUB_WORKFLOW"):
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",  # noqa: E501
     },
     {
         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
@@ -173,7 +175,7 @@ USE_TZ = True
 STATIC_URL = "/static/"
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, "static"),
 ]
 
 LOGGING = {
@@ -201,4 +203,4 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 100,
 }
 
-DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"

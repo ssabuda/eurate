@@ -9,11 +9,14 @@ class Command(BaseCommand):
     )
 
     def add_arguments(self, parser):
-        super(Command, self).add_arguments(parser)
+        super().add_arguments(parser)
         parser.add_argument(
             "--historic",
             action="store_true",
-            help="Add this argument if you want import full historic currency exchange rate",
+            help=(
+                "Add this argument if you want import full historic "
+                "currency exchange rate"
+            ),
         )
 
     def handle(self, *args, **options):

@@ -1,13 +1,14 @@
 from unittest import mock
+
 from django.test import TestCase
 
-from .test_adapter import TestEcbAdapterMixin
 from ..facade import RateFacade
 from ..factories import RateFactoryUSD
 from ..fixtures import ECB_RESPONSE
 from ..models import Rate
 from ..repository import APIEcbRepository
 from ..tasks import create_rate, run_import
+from .test_adapter import TestEcbAdapterMixin
 
 
 class TestRunImport(TestCase):

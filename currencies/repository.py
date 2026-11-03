@@ -1,17 +1,18 @@
+from collections.abc import Iterator
 from datetime import datetime
-from typing import Optional, Iterator
 from xml.etree import ElementTree
 
 import requests
 from django.conf import settings
 
 from core.abstract.repository import APIRepository
+
 from .adapter import RateEcbAdapter
 from .constants import ECB_XML_NAMESPACE
 
 
 class APIEcbRepository(APIRepository):
-    def __init__(self, historic: Optional[bool] = False):
+    def __init__(self, historic: bool | None = False):
         self.historic = historic
 
     def call_api(self) -> bytes:
