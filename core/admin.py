@@ -10,12 +10,8 @@ def export_to_csv(
 ) -> HttpResponse:
     opts = modeladmin.model._meta
     response = HttpResponse(content_type="text/csv")
-    response[
-        "Content-Disposition"
-    ] = "attachment; \
-        filename={}.csv".format(
-        opts.verbose_name
-    )
+    response["Content-Disposition"] = "attachment; \
+        filename={}.csv".format(opts.verbose_name)
     writer = csv.writer(response)
 
     fields = [
