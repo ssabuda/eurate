@@ -7,3 +7,4 @@ psycopg2-binary==2.9.13
 requests==2.34.2
 factory-boy==3.3.3
 coverage==7.16.0
+ruff==0.17.3
