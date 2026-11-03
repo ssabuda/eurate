@@ -1,7 +1,7 @@
 import datetime
 
 from factory.django import DjangoModelFactory
-from factory.fuzzy import FuzzyDate, FuzzyText, FuzzyDecimal
+from factory.fuzzy import FuzzyDate, FuzzyDecimal, FuzzyText
 
 from .models import Rate
 

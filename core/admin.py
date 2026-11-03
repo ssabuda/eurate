@@ -2,7 +2,7 @@ import csv
 import datetime
 
 from django.contrib import admin
-from django.http import HttpResponse, HttpRequest
+from django.http import HttpRequest, HttpResponse
 
 
 def export_to_csv(
@@ -10,8 +10,8 @@ def export_to_csv(
 ) -> HttpResponse:
     opts = modeladmin.model._meta
     response = HttpResponse(content_type="text/csv")
-    response["Content-Disposition"] = "attachment; \
-        filename={}.csv".format(opts.verbose_name)
+    response["Content-Disposition"] = f"attachment; \
+        filename={opts.verbose_name}.csv"
     writer = csv.writer(response)
 
     fields = [

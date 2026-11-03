@@ -1,9 +1,11 @@
 from datetime import date
-from django.urls import reverse, resolve
+
+from django.urls import resolve, reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from currencies.factories import RateFactoryUSD, RateFactoryPLN, RateFactory
+from currencies.factories import RateFactory, RateFactoryPLN, RateFactoryUSD
+
 from ..views import RateList, RateNewestList
 
 

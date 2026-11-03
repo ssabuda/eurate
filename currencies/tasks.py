@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 
 from .adapter import RateEcbAdapter
 from .facade import RateFacade
@@ -9,7 +8,7 @@ from .repository import APIEcbRepository
 logger = logging.getLogger(__name__)
 
 
-def run_import(historic: Optional[bool] = False):
+def run_import(historic: bool | None = False):
     logger.info("Start task run_import historical=%s", historic)
     for adapter in APIEcbRepository(historic).all():
         create_rate(adapter)

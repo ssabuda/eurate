@@ -2,10 +2,10 @@ from django.urls import path
 
 from api.views import (
     RateList,
-    RateNewestList,
-    api_root,
-    RateTopPriceList,
     RateLowestPriceList,
+    RateNewestList,
+    RateTopPriceList,
+    api_root,
 )
 
 app_name = "api"

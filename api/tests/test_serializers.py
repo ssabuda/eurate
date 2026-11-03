@@ -3,6 +3,7 @@ from decimal import Decimal
 from django.test import TestCase
 
 from currencies.factories import RateFactory
+
 from ..serializers import RateSerializer, significant
 
 

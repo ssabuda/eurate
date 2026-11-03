@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from django.test import TestCase
 
-from ..factories import RateFactory, RateFactoryUSD, RateFactoryPLN
+from ..factories import RateFactory, RateFactoryPLN, RateFactoryUSD
 from ..models import Rate
 
 
