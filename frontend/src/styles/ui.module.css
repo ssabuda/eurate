@@ -73,11 +73,12 @@
   cursor: pointer;
 }
 
-.button:hover:not(:disabled) {
+.button:hover:not(:disabled, [aria-disabled="true"]) {
   border-color: var(--color-accent);
 }
 
-.button:disabled {
+.button:disabled,
+.button[aria-disabled="true"] {
   color: var(--color-subtle);
   cursor: not-allowed;
   opacity: 0.6;
