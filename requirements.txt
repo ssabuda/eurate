@@ -1,5 +1,5 @@
 Django==5.2.17
-djangorestframework==3.18.1
+djangorestframework==3.18.3
 django-filter==26.1
 django-bootstrap4==26.2
 django-extensions==4.1
