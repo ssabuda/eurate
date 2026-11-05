@@ -18,8 +18,25 @@
   gap: 8px;
 }
 
+.error {
+  margin: 0 0 0 auto;
+  align-self: center;
+  font-size: 13px;
+  color: var(--color-down);
+  text-align: right;
+}
+
+.date[aria-invalid="true"] {
+  border-color: var(--color-down);
+}
+
 .scroll {
   overflow-x: auto;
+  transition: opacity 0.15s;
+}
+
+.stale {
+  opacity: 0.6;
 }
 
 .scroll table {

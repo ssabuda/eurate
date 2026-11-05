@@ -1,6 +1,6 @@
-import { fireEvent, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { addDays } from "../lib/format";
 import { mockApi, renderRoute, requestsTo } from "../test/render";
@@ -174,6 +174,228 @@ describe("CurrencyPage", () => {
 
     await user.click(screen.getByRole("button", { name: "Latest" }));
     await waitFor(() => expect(fixingDates()[0]).toBe("21 Oct 2026"));
+  });
+
+  describe("date filter", () => {
+    const APPLY_DELAY_MS = 300;
+
+    beforeEach(() => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    const dateInput = () => screen.getByLabelText("Show fixings up to");
+    const enter = (value) => fireEvent.change(dateInput(), { target: { value } });
+    const applyDelay = () => act(() => vi.advanceTimersByTimeAsync(APPLY_DELAY_MS));
+    const requestedDates = (fetch) =>
+      requestsTo(fetch, "rates")
+        .map((params) => params.get("date__lte"))
+        .filter(Boolean);
+
+    /** A half-typed date: browsers report "" with an invalid `validity`. */
+    const withPartialDate = (action) => {
+      const input = dateInput();
+      Object.defineProperty(input, "validity", { configurable: true, value: { valid: false } });
+      action(input);
+      delete input.validity;
+    };
+    const enterPartial = () =>
+      withPartialDate((input) => fireEvent.change(input, { target: { value: "" } }));
+
+    const applyFilter = async () => {
+      enter("2026-10-10");
+      await applyDelay();
+      await screen.findByText("1–4 of 4 fixings");
+    };
+
+    it("requests only the final date of a burst of edits", async () => {
+      const { fetch } = setup();
+      await screen.findByText("1–10 of 15 fixings");
+
+      for (const value of ["0002-10-10", "0020-10-10", "0202-10-10", "2026-10-01", "2026-10-10"]) {
+        enter(value);
+        expect(dateInput()).toHaveValue(value);
+      }
+      expect(requestedDates(fetch)).toEqual([]);
+
+      await applyDelay();
+      await screen.findByText("1–4 of 4 fixings");
+      expect(requestedDates(fetch)).toEqual(["2026-10-10"]);
+    });
+
+    it.each(["0500-01-01", "20261-10-10"])("explains why %s is not applied", async (value) => {
+      const { fetch } = setup();
+      await screen.findByText("1–10 of 15 fixings");
+
+      enter(value);
+      await applyDelay();
+      // No message while typing: a year passes through 0002 on its way to 2026.
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+
+      fireEvent.blur(dateInput());
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "Enter a full date with a year between 1000 and 9999. The table has not changed.",
+      );
+      expect(dateInput()).toBeInvalid();
+      expect(requestedDates(fetch)).toEqual([]);
+      expect(fixingDates()[0]).toBe("21 Oct 2026");
+      // The message steps aside while the date is being corrected.
+      fireEvent.focus(dateInput());
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+      fireEvent.blur(dateInput());
+      expect(screen.getByRole("button", { name: "Latest" })).toBeInTheDocument();
+
+      enter("2026-10-10");
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+      await applyDelay();
+      await screen.findByText("1–4 of 4 fixings");
+    });
+
+    it("keeps the filter and page while a date is partly edited, and drops them on a real clear", async () => {
+      const { fetch } = setup();
+      await screen.findByText("1–10 of 15 fixings");
+      enter("2026-10-20");
+      await applyDelay();
+      await screen.findByText("1–10 of 14 fixings");
+      fireEvent.click(screen.getByRole("button", { name: "Older" }));
+      await screen.findByText("11–14 of 14 fixings");
+      const requests = requestsTo(fetch, "rates").length;
+
+      enterPartial();
+      await applyDelay();
+
+      expect(screen.getByText("11–14 of 14 fixings")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Latest" })).toBeInTheDocument();
+      expect(requestsTo(fetch, "rates")).toHaveLength(requests);
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+
+      withPartialDate((input) => fireEvent.blur(input));
+      expect(screen.getByRole("alert")).toBeInTheDocument();
+
+      enter("2026-10-20");
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+      enter("");
+      await applyDelay();
+      await screen.findByText("1–10 of 15 fixings");
+      expect(screen.queryByRole("button", { name: "Latest" })).not.toBeInTheDocument();
+    });
+
+    it("shows Latest only for an applied filter, and it cancels a pending edit", async () => {
+      const { fetch } = setup();
+      await screen.findByText("1–10 of 15 fixings");
+
+      enter("2026-10-10");
+      expect(screen.queryByRole("button", { name: "Latest" })).not.toBeInTheDocument();
+      await applyDelay();
+      await screen.findByText("1–4 of 4 fixings");
+
+      enter("2026-10-09");
+      fireEvent.click(screen.getByRole("button", { name: "Latest" }));
+      await applyDelay();
+
+      await screen.findByText("1–10 of 15 fixings");
+      expect(dateInput()).toHaveValue("");
+      expect(requestedDates(fetch)).toEqual(["2026-10-10"]);
+    });
+
+    it("clears an invalid date with Latest", async () => {
+      setup();
+      await screen.findByText("1–10 of 15 fixings");
+      await applyFilter();
+
+      enter("0500-01-01");
+      await applyDelay();
+      fireEvent.blur(dateInput());
+      expect(screen.getByRole("alert")).toBeInTheDocument();
+      expect(fixingDates()[0]).toBe("10 Oct 2026");
+
+      fireEvent.click(screen.getByRole("button", { name: "Latest" }));
+      await screen.findByText("1–10 of 15 fixings");
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+      expect(dateInput()).toHaveFocus();
+    });
+
+    it("drops the filter when the date was cleared one segment at a time", async () => {
+      setup();
+      await screen.findByText("1–10 of 15 fixings");
+      await applyFilter();
+
+      enterPartial();
+      await applyDelay();
+      expect(fixingDates()[0]).toBe("10 Oct 2026");
+
+      // The last segment fires no change event: only leaving the field reveals it.
+      fireEvent.blur(dateInput());
+
+      await screen.findByText("1–10 of 15 fixings");
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Latest" })).not.toBeInTheDocument();
+    });
+
+    it("stays on the page when the same date is entered again", async () => {
+      setup();
+      await screen.findByText("1–10 of 15 fixings");
+      enter("2026-10-20");
+      await applyDelay();
+      await screen.findByText("1–10 of 14 fixings");
+      fireEvent.click(screen.getByRole("button", { name: "Older" }));
+      await screen.findByText("11–14 of 14 fixings");
+
+      enterPartial();
+      enter("2026-10-20");
+      await applyDelay();
+      fireEvent.blur(dateInput());
+
+      expect(screen.getByText("11–14 of 14 fixings")).toBeInTheDocument();
+    });
+
+    it("applies a pending date straight away when the field is left", async () => {
+      const { fetch } = setup();
+      await screen.findByText("1–10 of 15 fixings");
+
+      enter("2026-10-10");
+      fireEvent.blur(dateInput());
+      await screen.findByText("1–4 of 4 fixings");
+      await applyDelay();
+
+      expect(requestedDates(fetch)).toEqual(["2026-10-10"]);
+    });
+  });
+
+  it("marks fixings as stale and blocks paging until the next page arrives", async () => {
+    let release;
+    const held = new Promise((resolve) => (release = resolve));
+    mockApi({
+      newest: NEWEST,
+      rates: async (params) => {
+        if (params.get("offset") === "10") await held;
+        return rates(params);
+      },
+      topprice: byCurrency(HIGHS),
+      lowestprice: byCurrency(LOWS),
+    });
+    renderRoute(<CurrencyPage />, { path: "/currency/:code", url: "/currency/USD" });
+    const user = userEvent.setup();
+    await screen.findByText("1–10 of 15 fixings");
+    const table = screen.getByRole("table").parentElement;
+
+    await user.click(screen.getByRole("button", { name: "Older" }));
+
+    expect(table).toHaveAttribute("aria-busy", "true");
+    expect(screen.queryByText(/of 15 fixings/)).not.toBeInTheDocument();
+    const older = screen.getByRole("button", { name: "Older" });
+    // Still focusable, so a keyboard user keeps their place, but inert.
+    expect(older).toHaveFocus();
+    expect(older).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("button", { name: "Newer" })).toHaveAttribute("aria-disabled", "true");
+    await user.click(screen.getByRole("button", { name: "Newer" }));
+
+    release();
+    await screen.findByText("11–15 of 15 fixings");
+    expect(table).toHaveAttribute("aria-busy", "false");
   });
 
   it("switches currency from the picker", async () => {
