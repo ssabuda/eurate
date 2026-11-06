@@ -1,13 +1,17 @@
+from collections.abc import Iterable
 from datetime import date
+from itertools import batched
 
 from django.db import models
 from django.db.models.functions import window
 
+from core.abstract.adapter import RateAdapter
 from core.models import TimeStampedModel
 from currencies.constants import EUR, Price
 
 # Cross rates keep more decimals than the 4 stored; the API rounds them.
 CROSS_RATE_FIELD = models.DecimalField(max_digits=30, decimal_places=12)
+IMPORT_BATCH_SIZE = 1000
 
 
 class RateManager(models.Manager):
@@ -100,9 +104,20 @@ class RateManager(models.Manager):
     def date(self, date_value: date, **kwargs):
         return self.filter(date=date_value)
 
-    def is_exists(self, date_value: date, currency: str, **kwargs) -> bool:
-        currency = self.currency(currency)
-        return currency.filter(date=date_value).exists()
+    def bulk_import(self, adapters: Iterable[RateAdapter]) -> int:
+        """
+        Save rates batch by batch, leaving those already stored untouched.
+        Returns how many rows were added. Each batch is committed on its own, so
+        a failure keeps the earlier ones and a rerun adds the rest; inside an
+        outer transaction.atomic() the batches commit or roll back with it.
+        bulk_create skips Rate.save(), so adapters must provide a normalized
+        currency.
+        """
+        count_before = self.count()
+        for batch in batched(adapters, IMPORT_BATCH_SIZE):
+            rates = [self.model(**adapter.to_dict()) for adapter in batch]
+            self.bulk_create(rates, ignore_conflicts=True)
+        return self.count() - count_before
 
 
 class Rate(TimeStampedModel):
