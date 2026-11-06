@@ -10,6 +10,9 @@ from core.abstract.repository import APIRepository
 from .adapter import RateEcbAdapter
 from .constants import ECB_XML_NAMESPACE
 
+# Applies to connecting and to each wait for data, not to the whole download.
+REQUEST_TIMEOUT_SECONDS = 30
+
 
 class APIEcbRepository(APIRepository):
     def __init__(self, historic: bool | None = False):
@@ -21,7 +24,9 @@ class APIEcbRepository(APIRepository):
             if self.historic
             else settings.ECB_LAST_90_DAYS_RATES_URL
         )
-        return requests.get(url).content
+        response = requests.get(url, timeout=REQUEST_TIMEOUT_SECONDS)
+        response.raise_for_status()
+        return response.content
 
     def get_rates(self, api_data: bytes) -> Iterator[RateEcbAdapter]:
         xml_data = ElementTree.fromstring(api_data)

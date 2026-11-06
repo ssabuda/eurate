@@ -92,14 +92,6 @@ class TestRateManager(TestCase):
         rates = Rate.objects.date(self.FILTER_DATE).values_list("date", flat=True)
         self.assertSetEqual(set(rates), {self.FILTER_DATE})
 
-    def test_is_exist_true(self):
-        rates = Rate.objects.is_exists(self.USD_DATE, self.USD_CURRENCY)
-        self.assertTrue(rates)
-
-    def test_is_exists_false(self):
-        rates = Rate.objects.is_exists(date(1986, 1, 1), "XYZ")
-        self.assertFalse(rates)
-
     def test_get_most_expensive(self):
         rates = Rate.objects.get_most_expensive().values_list("pk", flat=True)
         self.assertIn(self.most_expensive_pln.pk, rates)

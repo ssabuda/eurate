@@ -16,7 +16,7 @@ class RateEcbAdapter(RateAdapter):
 
     @property
     def currency(self) -> str:
-        return self.data.get("currency")
+        return self.data.get("currency").upper()
 
     @property
     def rate(self) -> Decimal:
